@@ -5,7 +5,8 @@
 #include "io.h"
 #include <cstdlib>
 #include <ctime>
-
+#include <iostream>
+using namespace std ;
 // ============================================================================
 // SIMULATION.CPP - Implementation of main simulation logic
 // ============================================================================
@@ -24,8 +25,12 @@ void initializeSimulation() {
 
 void simulateOneTick()
 {
-    spawnTrainsForTick();  // Day 2
-    moveAllTrains();       // Day 2
+    cout << "Tick: " << currentTick << endl;
+
+    spawnTrainsForTick();   // Day 2 logic
+    determineAllRoutes();   // NEW
+    detectCollisions();     // NEW
+    moveAllTrains();        // Day 2 logic
     currentTick++;
 }
 // ----------------------------------------------------------------------------

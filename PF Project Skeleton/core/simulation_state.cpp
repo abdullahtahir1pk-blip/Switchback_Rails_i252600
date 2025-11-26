@@ -24,6 +24,9 @@ bool trainActive[200];
 int trainStartTick[200];
 int spawnRow[200];
 int spawnCol[200];
+Train trains[200];
+
+
 
 
 // ----------------------------------------------------------------------------

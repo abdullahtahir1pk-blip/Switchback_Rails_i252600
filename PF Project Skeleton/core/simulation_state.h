@@ -25,6 +25,16 @@ extern bool trainActive[200];
 extern int trainStartTick[200];
 extern int spawnRow[200];
 extern int spawnCol[200];
+int nextRow;
+int nextCol;
+struct Train {
+    int row, col;
+    int direction;
+    bool active;
+    int nextRow;
+    int nextCol;
+};
+extern Train trains[200];
 
 // ----------------------------------------------------------------------------
 // SWITCH CONSTANTS

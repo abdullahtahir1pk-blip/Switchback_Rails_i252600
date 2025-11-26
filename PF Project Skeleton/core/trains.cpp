@@ -24,21 +24,18 @@ void spawnTrainsForTick()
 {
     for (int i = 0; i < trainCount; i++)
     {
-        if (trainActive[i]) continue;
+        Train &t = trains[i];
 
-        if (trainStartTick[i] == currentTick)
-        {
-            int r = spawnRow[i];
-            int c = spawnCol[i];
+        if (t.active) continue;
+        if (trainStartTick[i] != currentTick) continue;
 
-            // Only spawn if spot is empty
-            if (grid[r][c] == 'S')
-            {
-                trainRow[i] = r;
-                trainCol[i] = c;
-                trainActive[i] = true;
-            }
-        }
+        int r = spawnRow[i];
+        int c = spawnCol[i];
+
+        t.row = r;
+        t.col = c;
+        t.direction = trainDir[i];
+        t.active = true;
     }
 }
 
@@ -49,19 +46,45 @@ void spawnTrainsForTick()
 // ----------------------------------------------------------------------------
 // Compute next position/direction from current tile and rules.
 // ----------------------------------------------------------------------------
-bool determineNextPosition(int id) {
-    //day 3 routing
-    return 0 ;
+bool determineNextPosition(int id)
+{
+    Train &t = trains[id];
+
+    int nr = t.row + dr[t.direction];
+    int nc = t.col + dc[t.direction];
+
+    t.nextRow = nr;
+    t.nextCol = nc;
+
+    return true;
 }
+
+
 
 // ----------------------------------------------------------------------------
 // GET NEXT DIRECTION based on current tile and direction
 // ----------------------------------------------------------------------------
 // Return new direction after entering the tile.
 // ----------------------------------------------------------------------------
-int getNextDirection(int id , char tile) {
-    //day 3 turning logic
-    return 0 ;
+int getNextDirection(int dir, char tile)
+{
+    if (tile == '-' || tile == '|')
+        return dir;
+    if (tile == '/')
+    {
+        if (dir == 0) return 1;
+        if (dir == 1) return 0;
+        if (dir == 2) return 3;
+        if (dir == 3) return 2;
+    }
+    if (tile == '\\')
+    {
+        if (dir == 0) return 3;
+        if (dir == 3) return 0;
+        if (dir == 1) return 2;
+        if (dir == 2) return 1;
+    }
+    return dir;
 }
 
 // ----------------------------------------------------------------------------
@@ -69,19 +92,27 @@ int getNextDirection(int id , char tile) {
 // ----------------------------------------------------------------------------
 // Choose best direction at '+' toward destination.
 // ----------------------------------------------------------------------------
-int getSmartDirectionAtCrossing(int id) {
-    //day 3 chose best direction
-    return 0 ;
+int getSmartDirectionAtCrossing(int dir)
+{
+    return dir; // Day-3 simple version (full comes in Day-5)
 }
-
 // ----------------------------------------------------------------------------
 // DETERMINE ALL ROUTES (PHASE 2)
 // ----------------------------------------------------------------------------
 // Fill next positions/directions for all trains.
-// ----------------------------------------------------------------------------
-void determineAllRoutes() {
-    //day 3 future position
+void determineAllRoutes()
+{
+    for (int i = 0; i < trainCount; i++)
+    {
+        Train &t = trains[i];
+        if (!t.active) continue;
+
+        determineNextPosition(i);
+    }
 }
+
+
+
 
 // ----------------------------------------------------------------------------
 // MOVE ALL TRAINS (PHASE 5)
@@ -92,41 +123,22 @@ void moveAllTrains()
 {
     for (int i = 0; i < trainCount; i++)
     {
-        if (!trainActive[i])
-            continue;
+        if (!trainActive[i]) continue;
 
         int r = trainRow[i];
         int c = trainCol[i];
         int d = trainDir[i];
 
-        // Compute next tile
         int nr = r + dr[d];
         int nc = c + dc[d];
 
         char tile = grid[nr][nc];
 
-        // Track turning rules
-        if (tile == '/')
-        {
-            if (d == 0) d = 1;
-            else if (d == 1) d = 0;
-            else if (d == 2) d = 3;
-            else if (d == 3) d = 2;
-        }
-        else if (tile == '\\')
-        {
-            if (d == 0) d = 3;
-            else if (d == 3) d = 0;
-            else if (d == 2) d = 1;
-            else if (d == 1) d = 2;
-        }
-        else if (tile == '+')
-        {
-            // Day-2: No routing logic yet
-            // '+' behaves as straight
-        }
+        if (tile == '+')
+            d = getSmartDirectionAtCrossing(d);
+        else
+            d = getNextDirection(d, tile);
 
-        // Apply movement
         trainRow[i] = nr;
         trainCol[i] = nc;
         trainDir[i] = d;
