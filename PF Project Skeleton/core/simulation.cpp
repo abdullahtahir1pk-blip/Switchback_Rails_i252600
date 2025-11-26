@@ -15,18 +15,23 @@
 // ----------------------------------------------------------------------------
 
 void initializeSimulation() {
+    initializeSimulationState();
 }
 
 // ----------------------------------------------------------------------------
 // SIMULATE ONE TICK
 // ----------------------------------------------------------------------------
 
-void simulateOneTick() {
+void simulateOneTick()
+{
+    spawnTrainsForTick();  // Day 2
+    moveAllTrains();       // Day 2
+    currentTick++;
 }
-
 // ----------------------------------------------------------------------------
 // CHECK IF SIMULATION IS COMPLETE
 // ----------------------------------------------------------------------------
 
 bool isSimulationComplete() {
+    return simulationComplete;
 }

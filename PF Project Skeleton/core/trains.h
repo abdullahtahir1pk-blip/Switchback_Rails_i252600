@@ -18,13 +18,13 @@ void spawnTrainsForTick();
 void determineAllRoutes();
 
 // Compute next position/direction for a train.
-bool determineNextPosition();
+bool determineNextPosition(int id);
 
 // Get next direction on entering a tile.
-int getNextDirection();
+int getNextDirection(int id , char tile);
 
 // Choose best direction at a crossing.
-int getSmartDirectionAtCrossing();
+int getSmartDirectionAtCrossing(int id);
 
 // ----------------------------------------------------------------------------
 // TRAIN MOVEMENT

@@ -10,18 +10,36 @@
 // ----------------------------------------------------------------------------
 // GRID CONSTANTS
 // ----------------------------------------------------------------------------
-
+extern int rows;
+extern int cols;
+extern char grid[200][200];
 
 // ----------------------------------------------------------------------------
 // TRAIN CONSTANTS
 // ----------------------------------------------------------------------------
-
+extern int trainCount;
+extern int trainRow[200];
+extern int trainCol[200];
+extern int trainDir[200];
+extern bool trainActive[200];
+extern int trainStartTick[200];
+extern int spawnRow[200];
+extern int spawnCol[200];
 
 // ----------------------------------------------------------------------------
 // SWITCH CONSTANTS
 // ----------------------------------------------------------------------------
+extern int switchCount;
+extern char switchId[200];
+extern int switchState[200];        // STRAIGHT or TURN
+extern int switchCounter[200];      // for flip K
+extern bool switchFlipQueued[200];
 
-
+extern int currentTick;
+extern int totalTicks;
+extern bool simulationComplete;
+extern bool emergencyActive;
+extern int emergencyTimer;
 // ----------------------------------------------------------------------------
 // WEATHER CONSTANTS
 // ----------------------------------------------------------------------------
