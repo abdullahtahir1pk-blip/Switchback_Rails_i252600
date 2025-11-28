@@ -7,6 +7,7 @@
 #include <ctime>
 #include <iostream>
 using namespace std ;
+
 // ============================================================================
 // SIMULATION.CPP - Implementation of main simulation logic
 // ============================================================================
@@ -14,7 +15,6 @@ using namespace std ;
 // ----------------------------------------------------------------------------
 // INITIALIZE SIMULATION
 // ----------------------------------------------------------------------------
-
 void initializeSimulation() {
     initializeSimulationState();
 }
@@ -22,21 +22,40 @@ void initializeSimulation() {
 // ----------------------------------------------------------------------------
 // SIMULATE ONE TICK
 // ----------------------------------------------------------------------------
-
 void simulateOneTick()
 {
     cout << "Tick: " << currentTick << endl;
 
-    spawnTrainsForTick();   // Day 2 logic
-    determineAllRoutes();   // NEW
-    detectCollisions();     // NEW
-    moveAllTrains();        // Day 2 logic
+    // Phase 1 - spawn
+    spawnTrainsForTick();
+
+    // Phase 2 - plan routes / next positions
+    determineAllRoutes();
+
+    // Phase 3 - update switch counters based on train positions
+    updateSwitchCounters();
+
+    // Phase 4 - queue flips if thresholds reached (deferred)
+    queueSwitchFlips();
+
+    // Phase 5 - collision detection using planned moves
+    detectCollisions();
+
+    // Phase 6 - commit moves
+    moveAllTrains();
+
+    // Phase 7 - apply deferred flips
+    applyDeferredFlips();
+
+    // Phase 8 - arrivals / metrics
+    checkArrivals();
+
     currentTick++;
 }
+
 // ----------------------------------------------------------------------------
 // CHECK IF SIMULATION IS COMPLETE
 // ----------------------------------------------------------------------------
-
 bool isSimulationComplete() {
     return simulationComplete;
 }

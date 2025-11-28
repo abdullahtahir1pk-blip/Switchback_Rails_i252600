@@ -1,6 +1,5 @@
 #include "simulation_state.h"
 #include <cstring>
-
 // ============================================================================
 // SIMULATION_STATE.CPP - Global state definitions
 // ============================================================================
@@ -24,9 +23,11 @@ bool trainActive[200];
 int trainStartTick[200];
 int spawnRow[200];
 int spawnCol[200];
-Train trains[200];
-
-
+int nextRow[200];
+int nextCol[200];
+int nextDir[200];
+bool willMove[200];  
+bool crashed[200];
 
 
 // ----------------------------------------------------------------------------

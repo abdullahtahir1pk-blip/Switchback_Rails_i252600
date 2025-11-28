@@ -2,43 +2,25 @@
 #define SWITCHES_H
 
 // ============================================================================
-// SWITCHES.H - Switch logic
+// SWITCHES.H - Switch logic (global-style)
 // ============================================================================
 
-// ----------------------------------------------------------------------------
-// SWITCH COUNTER UPDATE
-// ----------------------------------------------------------------------------
 // Increment counters when trains enter switches.
 void updateSwitchCounters();
 
-// ----------------------------------------------------------------------------
-// FLIP QUEUE
-// ----------------------------------------------------------------------------
-// Queue flips when counters reach K.
+// Queue flips when counters reach threshold.
 void queueSwitchFlips();
 
-// ----------------------------------------------------------------------------
-// DEFERRED FLIP
-// ----------------------------------------------------------------------------
-// Apply queued flips after movement.
+// Apply queued deferred flips after movement.
 void applyDeferredFlips();
 
-// ----------------------------------------------------------------------------
-// SIGNAL CALCULATION
-// ----------------------------------------------------------------------------
-// Update switch signal colors.
+// Update signal light colors (stub).
 void updateSignalLights();
 
-// ----------------------------------------------------------------------------
-// SWITCH TOGGLE (for manual control / editing)
-// ----------------------------------------------------------------------------
-// Manually toggle a switch state.
+// Manually toggle a switch state (stub).
 void toggleSwitchState();
 
-// ----------------------------------------------------------------------------
-// HELPER FUNCTIONS
-// ----------------------------------------------------------------------------
-// Get state for a given direction.
-int getSwitchStateForDirection();
+// Get switch state helper (index -> state)
+int getSwitchStateForDirection(int index);
 
 #endif

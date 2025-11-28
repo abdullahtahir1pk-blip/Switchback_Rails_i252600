@@ -5,15 +5,9 @@
 // TRAINS.H - Train logic
 // ============================================================================
 
-// ----------------------------------------------------------------------------
-// TRAIN SPAWNING
-// ----------------------------------------------------------------------------
 // Spawn trains scheduled for the current tick.
 void spawnTrainsForTick();
 
-// ----------------------------------------------------------------------------
-// TRAIN ROUTING
-// ----------------------------------------------------------------------------
 // Compute routes for all trains (Phase 2).
 void determineAllRoutes();
 
@@ -21,36 +15,22 @@ void determineAllRoutes();
 bool determineNextPosition(int id);
 
 // Get next direction on entering a tile.
-int getNextDirection(int id , char tile);
+int getNextDirection(int dir, char tile);
 
 // Choose best direction at a crossing.
-int getSmartDirectionAtCrossing(int id);
+int getSmartDirectionAtCrossing(int dir);
 
-// ----------------------------------------------------------------------------
-// TRAIN MOVEMENT
-// ----------------------------------------------------------------------------
 // Move trains and handle collisions (Phase 5).
 void moveAllTrains();
 
-// ----------------------------------------------------------------------------
-// COLLISION DETECTION
-// ----------------------------------------------------------------------------
-// Detect trains targeting the same tile/swap/crossing.
+// Detect trains targeting the same tile / swap / crossing
 void detectCollisions();
 
-// ----------------------------------------------------------------------------
-// ARRIVALS
-// ----------------------------------------------------------------------------
 // Mark trains that reached destinations.
 void checkArrivals();
 
-// ----------------------------------------------------------------------------
-// EMERGENCY HALT
-// ----------------------------------------------------------------------------
-// Apply emergency halt in active zone.
+// Emergency halt hooks
 void applyEmergencyHalt();
-
-// Update emergency halt timer.
 void updateEmergencyHalt();
 
 #endif
