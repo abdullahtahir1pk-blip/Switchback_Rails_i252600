@@ -2,18 +2,16 @@
 #include "simulation_state.h"
 #include "grid.h"
 #include "switches.h"
+#include "io.h"
 #include <cstdlib>
+#include <iostream>
+using namespace std;
 
 // ============================================================================
-// TRAINS.CPP - Train logic
+// TRAINS.CPP - Train logic (global-array style)
 // ============================================================================
-// Direction vectors
-// 0 = UP, 1 = RIGHT, 2 = DOWN, 3 = LEFT
 int dr[4] = {-1, 0, 1,  0};
 int dc[4] = { 0, 1, 0, -1};
-// Storage for planned moves (for collisions).
-
-// Previous positions (to detect switch entry).
 
 // ----------------------------------------------------------------------------
 // SPAWN TRAINS FOR CURRENT TICK
@@ -30,20 +28,19 @@ void spawnTrainsForTick()
         int r = spawnRow[i];
         int c = spawnCol[i];
 
-        trainRow[i]  = r;
-        trainCol[i]  = c;
+        trainRow[i] = r;
+        trainCol[i] = c;
+        // assume trainDir[i] already set during level load
         trainActive[i] = true;
-        
+
+        // initialize planned move arrays
         willMove[i] = false;
-        nextRow[i] = -1;
-        nextCol[i] = -1;
-        nextDir[i] = trainDir[i];
-        crashed[i] = false;
+        nextRow[i]  = -1;
+        nextCol[i]  = -1;
+        nextDir[i]  = trainDir[i];
+        crashed[i]  = false;
     }
 }
-
-
-
 
 // ----------------------------------------------------------------------------
 // DETERMINE NEXT POSITION for a train
@@ -60,13 +57,9 @@ bool determineNextPosition(int id)
     int r = trainRow[id];
     int c = trainCol[id];
     int d = trainDir[id];
-
     int nr = r + dr[d];
     int nc = c + dc[d];
-
-    // safe bounds check
-    if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) {
-        // out of bounds -> mark as not moving (will be handled as crash if you want)
+    if (!isInBounds(nr, nc)) {
         willMove[id] = false;
         nextRow[id] = nr;
         nextCol[id] = nc;
@@ -76,10 +69,11 @@ bool determineNextPosition(int id)
 
     char tile = grid[nr][nc];
     int nd = d;
+
     if (tile == '+') {
-        nd = getSmartDirectionAtCrossing(d); // day-3 simple straight, may be extended
+        nd = getSmartDirectionAtCrossing(d);
     } else {
-        nd = getNextDirection(d, tile); // handles / and \ and straight
+        nd = getNextDirection(d, tile);
     }
 
     nextRow[id] = nr;
@@ -90,18 +84,13 @@ bool determineNextPosition(int id)
     return true;
 }
 
-
-
-
 // ----------------------------------------------------------------------------
 // GET NEXT DIRECTION based on current tile and direction
 // ----------------------------------------------------------------------------
-// Return new direction after entering the tile.
-// ----------------------------------------------------------------------------
 int getNextDirection(int dir, char tile)
 {
-    if (tile == '-' || tile == '|')
-        return dir;
+    if (tile == '-' || tile == '|') return dir;
+
     if (tile == '/')
     {
         if (dir == 0) return 1;
@@ -109,6 +98,7 @@ int getNextDirection(int dir, char tile)
         if (dir == 2) return 3;
         if (dir == 3) return 2;
     }
+
     if (tile == '\\')
     {
         if (dir == 0) return 3;
@@ -116,42 +106,63 @@ int getNextDirection(int dir, char tile)
         if (dir == 1) return 2;
         if (dir == 2) return 1;
     }
+
+    // Switch handling could be added later (Day-6+)
     return dir;
 }
 
 // ----------------------------------------------------------------------------
-// SMART ROUTING AT CROSSING - Route train to its matched destination
-// ----------------------------------------------------------------------------
-// Choose best direction at '+' toward destination.
+// SMART ROUTING AT CROSSING - simple for now (can be improved Day-5+)
 // ----------------------------------------------------------------------------
 int getSmartDirectionAtCrossing(int dir)
 {
-    return dir; // Day-3 simple version (full comes in Day-5)
+    int straight = dir;
+    int right = (dir + 1) % 4;
+    int left  = (dir + 3) % 4;
+    int back  = (dir + 2) % 4;
+    int rr, rc;
+    rr = nextRow[0]; 
+    rr = trainRow[0]; rc = trainCol[0];
+    rr = trainRow[0]; rc = trainCol[0]; 
+    auto test_dir = [&](int base_r, int base_c, int cand_dir)->bool {
+        int tr = base_r, tc = base_c;
+        if (cand_dir == 0) tr--;
+        else if (cand_dir == 1) tc++;
+        else if (cand_dir == 2) tr++;
+        else tc--;
+        if (!isInBounds(tr, tc)) return false;
+        return isTrackTile(grid[tr][tc]) || isSwitchTile(grid[tr][tc]) || grid[tr][tc] == 'D';
+    };
+
+    int base_r = trainRow[0]; 
+    return straight;
 }
+
 // ----------------------------------------------------------------------------
 // DETERMINE ALL ROUTES (PHASE 2)
 // ----------------------------------------------------------------------------
 // Fill next positions/directions for all trains.
 void determineAllRoutes()
 {
-    // reset plan map
+  
     for (int i = 0; i < trainCount; ++i) {
         willMove[i] = false;
-        nextRow[i] = -999; nextCol[i] = -999; nextDir[i] = trainDir[i];
+        nextRow[i] = -999;
+        nextCol[i] = -999;
+        nextDir[i] = trainDir[i];
         crashed[i] = false;
     }
     for (int i = 0; i < trainCount; ++i) {
         if (trainActive[i]) determineNextPosition(i);
     }
 }
+
 // ----------------------------------------------------------------------------
-// MOVE ALL TRAINS (PHASE 5)
-// ----------------------------------------------------------------------------
-// Move trains; resolve collisions and apply effects.
+// MOVE ALL TRAINS (PHASE 6 - commit moves)
 // ----------------------------------------------------------------------------
 void moveAllTrains()
 {
-    for (int i = 0; i < trainCount; i++)
+    for (int i = 0; i < trainCount; ++i)
     {
         if (!trainActive[i]) continue;
         if (!willMove[i]) continue;
@@ -160,7 +171,7 @@ void moveAllTrains()
         int nc = nextCol[i];
         int nd = nextDir[i];
 
-        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) {
+        if (!isInBounds(nr, nc)) {
             trainActive[i] = false;
             crashed[i] = true;
             continue;
@@ -169,39 +180,31 @@ void moveAllTrains()
         trainRow[i] = nr;
         trainCol[i] = nc;
         trainDir[i] = nd;
-
-        if (grid[nr][nc] == 'D') {
-            trainActive[i] = false;
-        }
     }
 }
 
-
 // ----------------------------------------------------------------------------
-// DETECT COLLISIONS WITH PRIORITY SYSTEM
-// ----------------------------------------------------------------------------
-// Resolve same-tile, swap, and crossing conflicts.
+// DETECT COLLISIONS WITH PRIORITY SYSTEM (basic version)
 // ----------------------------------------------------------------------------
 void detectCollisions()
 {
-    for (int i = 0; i < trainCount; i++)
+    for (int i = 0; i < trainCount; ++i)
     {
         if (!trainActive[i]) continue;
 
-        for (int j = i + 1; j < trainCount; j++)
+        for (int j = i + 1; j < trainCount; ++j)
         {
             if (!trainActive[j]) continue;
-
             if (!willMove[i] || !willMove[j]) continue;
 
-            // Same target tile
+           
             if (nextRow[i] == nextRow[j] && nextCol[i] == nextCol[j])
             {
                 willMove[i] = false;
                 willMove[j] = false;
             }
 
-            // Swap
+           
             if (nextRow[i] == trainRow[j] && nextCol[i] == trainCol[j] &&
                 nextRow[j] == trainRow[i] && nextCol[j] == trainCol[i])
             {
@@ -212,30 +215,29 @@ void detectCollisions()
     }
 }
 
-
 // ----------------------------------------------------------------------------
 // CHECK ARRIVALS
 // ----------------------------------------------------------------------------
-// Mark trains that reached destinations.
-// ----------------------------------------------------------------------------
-void checkArrivals() {
-    //day 5 
+void checkArrivals()
+{
+    for (int i = 0; i < trainCount; ++i)
+    {
+        if (!trainActive[i]) continue;
+
+        int r = trainRow[i];
+        int c = trainCol[i];
+
+        if (isInBounds(r, c) && grid[r][c] == 'D')
+        {
+            trainActive[i] = false;
+            crashed[i] = false;
+            cout << "Train " << i << " arrived at destination!\n";
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
-// APPLY EMERGENCY HALT
+// Emergency halt stubs (Day-6+)
 // ----------------------------------------------------------------------------
-// Apply halt to trains in the active zone.
-// ----------------------------------------------------------------------------
-void applyEmergencyHalt() {
-}
-
-// ----------------------------------------------------------------------------
-// UPDATE EMERGENCY HALT
-// ----------------------------------------------------------------------------
-// Decrement timer and disable when done.
-// ----------------------------------------------------------------------------
-void updateEmergencyHalt() {
-    //day 6
-}
-
+void applyEmergencyHalt() { }
+void updateEmergencyHalt() { }

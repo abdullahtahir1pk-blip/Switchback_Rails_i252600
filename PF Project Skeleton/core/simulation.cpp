@@ -6,11 +6,14 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
-using namespace std ;
+using namespace std;
 
 // ============================================================================
 // SIMULATION.CPP - Implementation of main simulation logic
 // ============================================================================
+
+// Forward (io.cpp may not declare printGrid in your header): safe forward-declare.
+void printGrid();
 
 // ----------------------------------------------------------------------------
 // INITIALIZE SIMULATION
@@ -49,6 +52,22 @@ void simulateOneTick()
 
     // Phase 8 - arrivals / metrics
     checkArrivals();
+
+    
+    printGrid();
+
+    // Check if all trains are finished
+    bool allDone = true;
+    for (int i = 0; i < trainCount; i++)
+    {
+        if (trainActive[i]) { allDone = false; break; }
+    }
+
+    if (allDone)
+    {
+        cout << "Simulation Complete!" << endl;
+        simulationComplete = true;
+    }
 
     currentTick++;
 }
