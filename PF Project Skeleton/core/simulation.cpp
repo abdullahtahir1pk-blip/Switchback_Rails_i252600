@@ -5,6 +5,7 @@
 #include "io.h"
 #include <cstdlib>
 #include <ctime>
+#include <unistd.h> // ONLY linux
 #include <iostream>
 using namespace std;
 
@@ -42,19 +43,26 @@ void simulateOneTick()
     queueSwitchFlips();
 
     // Phase 5 - collision detection using planned moves
+    // --- any collision-printing should be added inside detectCollisions()
     detectCollisions();
 
     // Phase 6 - commit moves
+    // --- any per-train movement prints should be added inside moveAllTrains()
     moveAllTrains();
 
     // Phase 7 - apply deferred flips
+    // --- any switch-flip prints should be added inside applyDeferredFlips()
     applyDeferredFlips();
 
     // Phase 8 - arrivals / metrics
+    // --- arrival-printing should be added inside checkArrivals()
     checkArrivals();
 
-    
+    // Render / debug output
     printGrid();
+
+    // small delay so terminal output is readable
+    usleep(300000);
 
     // Check if all trains are finished
     bool allDone = true;

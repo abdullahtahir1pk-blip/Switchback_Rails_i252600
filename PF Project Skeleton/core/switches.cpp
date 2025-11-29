@@ -3,7 +3,8 @@
 #include "grid.h"
 #include "io.h"
 #include <cstdio>
-
+#include <iostream>
+using namespace std ; 
 // ============================================================================
 // SWITCHES.CPP - Switch management (global-style)
 // ============================================================================
@@ -30,6 +31,7 @@ void updateSwitchCounters()
         int index = getSwitchIndex(tile);
         if (index < 0 || index >= switchCount) continue;
         switchCounter[index]++;
+        cout << "Switch " << i << " counter = " << switchCounter[i] << "\n";
     }
 }
 
@@ -59,15 +61,17 @@ void queueSwitchFlips()
 // ----------------------------------------------------------------------------
 void applyDeferredFlips()
 {
-    for (int i = 0; i < switchCount; ++i)
+    for (int i = 0; i < switchCount; i++)
     {
         if (!switchFlipQueued[i]) continue;
-        // toggle 0 <-> 1
-        if (switchState[i] == 0) switchState[i] = 1;
-        else switchState[i] = 0;
+
         switchFlipQueued[i] = false;
+        switchState[i] = 1 - switchState[i];
+
+        cout << "Switch " << i << " flipped to state " << switchState[i] << "\n";
     }
 }
+
 
 // ----------------------------------------------------------------------------
 // UPDATE SIGNAL LIGHTS

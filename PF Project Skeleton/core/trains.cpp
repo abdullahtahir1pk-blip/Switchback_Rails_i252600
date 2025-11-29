@@ -174,14 +174,18 @@ void moveAllTrains()
         if (!isInBounds(nr, nc)) {
             trainActive[i] = false;
             crashed[i] = true;
+            cout << "Train " << i << " went out of bounds! Crashed.\n";
             continue;
         }
 
         trainRow[i] = nr;
         trainCol[i] = nc;
         trainDir[i] = nd;
+
+        cout << "Train " << i << " moved to (" << nr << "," << nc << ")\n";
     }
 }
+
 
 // ----------------------------------------------------------------------------
 // DETECT COLLISIONS WITH PRIORITY SYSTEM (basic version)
@@ -197,23 +201,28 @@ void detectCollisions()
             if (!trainActive[j]) continue;
             if (!willMove[i] || !willMove[j]) continue;
 
-           
+            // same tile
             if (nextRow[i] == nextRow[j] && nextCol[i] == nextCol[j])
             {
+                cout << "Collision detected! Train " << i << " and Train " << j
+                     << " tried same tile (" << nextRow[i] << "," << nextCol[i] << ")\n";
                 willMove[i] = false;
                 willMove[j] = false;
             }
 
-           
+            // swap tile
             if (nextRow[i] == trainRow[j] && nextCol[i] == trainCol[j] &&
                 nextRow[j] == trainRow[i] && nextCol[j] == trainCol[i])
             {
+                cout << "Collision detected! Train " << i << " and Train " << j
+                     << " attempted swap!\n";
                 willMove[i] = false;
                 willMove[j] = false;
             }
         }
     }
 }
+
 
 // ----------------------------------------------------------------------------
 // CHECK ARRIVALS
@@ -231,13 +240,37 @@ void checkArrivals()
         {
             trainActive[i] = false;
             crashed[i] = false;
-            cout << "Train " << i << " arrived at destination!\n";
+            cout << "Train " << i << " reached destination!\n";
         }
     }
 }
 
+
 // ----------------------------------------------------------------------------
 // Emergency halt stubs (Day-6+)
 // ----------------------------------------------------------------------------
-void applyEmergencyHalt() { }
-void updateEmergencyHalt() { }
+void applyEmergencyHalt() {
+    for (int i = 0; i < trainCount; ++i)
+    willMove[i] = false;
+ }
+void updateEmergencyHalt() {
+    if (!emergencyActive) 
+    return;
+    emergencyTimer--;
+    if (emergencyTimer > 0)
+    {
+        cout << "EMERGENCY HALT ACTIVE!! Remaining ticks: " << emergencyTimer << endl;
+    }
+    else 
+    emergencyActive = false;
+        cout << "Halt released." << endl;
+    
+ }
+ void triggerEmergencyHalt(int duration)
+{
+    if (duration <= 0) 
+    return;
+    emergencyActive = true;
+    emergencyTimer = duration;
+    cout << "Emergency halt triggered for " << duration << " ticks." << endl;
+}
